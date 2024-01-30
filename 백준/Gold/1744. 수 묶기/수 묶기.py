@@ -1,90 +1,69 @@
-import sys
-n = int(sys.stdin.readline().rstrip())
-result = 0
+n = int(input())
+
+neg_cnt = [0] * 1001
+pos_cnt = [0] * 1001
 zero = False
-nag = []
-pos = []
+
+pos_max = 0
+neg_min = 0
+
 for _ in range(n):
-    tmp = int(sys.stdin.readline().rstrip())
-    if tmp < 0:
-        nag.append(tmp)
-    elif tmp >1:
-        pos.append(tmp)
-    elif tmp == 0 and not zero:
+    num = int(input())
+    if num > 0:
+        pos_cnt[num] += 1
+        if num > pos_max:
+            pos_max = num
+    elif num < 0:
+        neg_cnt[num] += 1
+        if num < neg_min:
+            neg_min = num
+    else:
         zero = True
-    elif tmp == 1:
-        result += 1
 
-def counting_sort(array, max):
-    counting_array = [0]*(max+1)
-    for i in array:
-        counting_array[i] += 1
- 
-    for i in range(max):
-        counting_array[i+1] += counting_array[i]
- 
-    output_array = [-1]*len(array)
-    
-    for i in array:
-        output_array[counting_array[i] -1] = i
-        counting_array[i] -= 1
-    return output_array
+remain_num = 0
+result = 0
 
-if nag:
-    nag = counting_sort(nag, -min(nag))
-if pos:
-    pos = counting_sort(pos, max(pos))
-if zero:
-    nag.append(0)
-lng = len(pos)
-sht = len(nag)
-if lng > sht:
-    i = 0
-    while i < sht:
-        rev = -i - 1
-        if i != sht- 1:
-            result += nag[i] * nag[i + 1] + pos[rev] * pos[rev - 1]
-            i += 1
-        else:
-            result += nag[i] + pos[rev] * pos[rev - 1]
-            i += 1
-        i += 1
-    while i < lng:
-        rev = -i - 1
-        if i != lng- 1:
-            result += pos[rev] * pos[rev - 1]
-            i += 1
-        else:
-            result += pos[rev]
-        i += 1
-elif lng < sht:
-    lng, sht = sht, lng
-    i = 0
-    while i < sht:
-        rev = -i - 1
-        if i != sht- 1:
-            result += nag[i] * nag[i + 1] + pos[rev] * pos[rev - 1]
-            i += 1
-        else:
-            result += pos[rev] + nag[i] * nag[i + 1]
-            i += 1
-        i += 1
-    while i < lng:
-        if i != lng- 1:
-            result += nag[i] * nag[i + 1]
-            i += 1
-        else:
-            result += nag[i]
-        i += 1
-        
-else:
-    i = 0
-    while i < sht:
-        rev = -i - 1
-        if i != sht- 1:
-            result += nag[i] * nag[i + 1] + pos[rev] * pos[rev - 1]
-            i += 1
-        else:
-            result += nag[i] + pos[rev]
-        i += 1
+# positive numbers
+for num in range(pos_max, 1, -1):
+    num_cnt = pos_cnt[num]
+    if num_cnt == 0:
+        continue
+
+    if remain_num:
+        result += num * remain_num
+        num_cnt -= 1
+
+    result += num_cnt // 2 * num ** 2
+
+    if num_cnt % 2:
+        remain_num = num
+    else:
+        remain_num = 0
+
+result += remain_num
+result += pos_cnt[1]
+remain_num = 0
+
+
+# negative numbers
+for num in range(neg_min, 0):
+    num_cnt = neg_cnt[num]
+    if num_cnt == 0:
+        continue
+
+    if remain_num:
+        result += num * remain_num
+        num_cnt -= 1
+
+    result += num_cnt // 2 * num ** 2
+
+    if num_cnt % 2:
+        remain_num = num
+    else:
+        remain_num = 0
+
+
+if not zero:
+    result += remain_num
+
 print(result)
