@@ -1,66 +1,72 @@
-import sys
-from collections import defaultdict
+from collections import deque
 
-input = sys.stdin.readline
+N = int(input())
+K = int(input())
+apple_location = [list(map(int, input().split())) for _ in range(K)]
+L = int(input())
+change_info = [list(map(str, input().split())) for _ in range(L)]
 
-n = int(input())
-k = int(input())
 
-apples = defaultdict(list)
-for i in range(k):
-    x, y = list(map(int, input().split()))
-    apples[y - 1].append(x - 1)
+def show_map(snake):
+    matrix = [[0] * N for _ in range(N)]
+    for y, x in snake:
+        matrix[y][x] = 1
 
-l = int(input())
+    return matrix
 
-moves = {}
-for i in range(l):
-    t, d = input().split()
-    moves[int(t)] = d
+# 우 하 좌 상
+move = ((0, 1), (1, 0), (0, -1), (-1, 0))
 
-snake = [[0, 0]]
-
-# L이 왼쪽. D가 오른쪽
-
-dir_x = [1, 0, -1, 0]
-dir_y = [0, 1, 0, -1]
-dir_idx = 0
-
-def move(x, y, dir_idx):
-    next_x = x + dir_x[dir_idx]
-    next_y = y + dir_y[dir_idx]
-
-    try:
-        if next_y in apples[next_x]:
-            snake.append([next_x, next_y])
-            apples[next_x].remove(next_y)
-        elif [next_x, next_y] in snake or not (0 <= next_x < n) or not (0 <= next_y < n):
-            return [-1, -1]
+snake = deque([(0, 0)])
+count = 0
+way = 0
+pan = 0
+time_cum = 0
+for time, path in change_info:
+    dy = move[way][0]
+    dx = move[way][1]
+    for _ in range(int(time) - time_cum):
+        ny, nx = dy + snake[-1][0], dx + snake[-1][1]
+        if not (0 <= ny < N) or not (0 <= nx < N):
+            count += 1
+            print(count)
+            exit()
         else:
-            snake.append([next_x, next_y])
-            snake.pop(0)
-    except:
-        if [next_x, next_y] in snake or not (0 <= next_x < n) or not (0 <= next_y < n):
-            return [-1, -1]
-        else:
-            snake.append([next_x, next_y])
-            snake.pop(0)
-    
-    return next_x, next_y
+            if [ny + 1, nx + 1] in apple_location:
+                apple_location.remove([ny + 1, nx + 1])
+                snake.append((ny, nx))
+                count += 1
+            else:
+                count += 1
+                if (ny, nx) in snake:
+                    print(count)
+                    exit()
+                snake.append((ny, nx))
+                snake.popleft()
 
-cnt = 0
-x, y = 0, 0
+    if path == 'L':
+        way = abs(way + 3) % 4
+    else:
+        way = abs(way + 1) % 4
+    time_cum = int(time)
 
+dy = move[way][0]
+dx = move[way][1]
 while True:
-    if cnt in moves:
-        if moves[cnt] == 'L':
-            dir_idx = (dir_idx + 4 - 1) % 4
+    ny, nx = dy + snake[-1][0], dx + snake[-1][1]
+    if not (0 <= ny < N) or not (0 <= nx < N):
+        count += 1
+        print(count)
+        exit()
+    else:
+        if [ny + 1, nx + 1] in apple_location:
+            apple_location.remove([ny + 1, nx + 1])
+            snake.append((ny, nx))
+            count += 1
         else:
-            dir_idx = (dir_idx + 1) % 4
-
-    x, y = move(x, y, dir_idx)
-    cnt += 1
-    if [x, y] == [-1, -1]:
-        break
-
-print(cnt)
+            count += 1
+            if (ny, nx) in snake:
+                print(count)
+                exit()
+            snake.append((ny, nx))
+            snake.popleft()
