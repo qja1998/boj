@@ -1,12 +1,18 @@
 N = int(input())
-figure = []
 
-for _ in range(N):
-    figure.append(list(map(int,input().split(' '))))
-figure.append(figure[0])
+x1, y1 = map(int, input().split())
+px, py = x1, y1
 
-answer = 0
-for i in range(N):
-    answer += figure[i][0]*figure[i+1][1] - figure[i+1][0]*figure[i][1]
+area = 0
+for _ in range(N-1):
+    x, y = map(int, input().split())
 
-print(abs(answer)/2)
+    area += px * y - x * py
+
+    px, py = x, y
+
+area += px * y1 - x1 * py
+
+area = abs(area) / 2 
+
+print(area)
