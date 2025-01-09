@@ -1,20 +1,24 @@
+import heapq
 T = int(input())
 
 for _ in range(T):
     K = int(input())
+
+    res = 0
     files = list(map(int, input().split()))
-
+    
     dp = [[0] * K for _ in range(K)]
-    sum_arr = [0] * (K + 1)
-    for i in range(1, K + 1):
-        sum_arr[i] = sum_arr[i - 1] + files[i - 1]
+    sum_list = [0] * (K + 1)
 
-    for gap in range(1, K):
-        for i in range(K - gap):
-            j = i + gap
-            dp[i][j] = float('inf')
-
-            for k in range(i, j):
-                dp[i][j] = min(dp[i][j], dp[i][k] + dp[k + 1][j] + sum_arr[j + 1] - sum_arr[i])
-
+    # 누적합
+    for i in range(K):
+        sum_list[i + 1] = sum_list[i] + files[i]
+    
+    for i in range(1, K):
+        for j in range(i, K):
+            dp[j - i][j] = float('inf')
+            for k in range(j - i, j):
+                dp[j - i][j] = min(dp[j - i][j], dp[j - i][k] + dp[k + 1][j])
+            dp[j - i][j] += sum_list[j + 1] - sum_list[j - i]
+    
     print(dp[0][K - 1])
