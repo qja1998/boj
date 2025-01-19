@@ -1,33 +1,31 @@
-def longest_alternating_string(n1, n2, s1, s2):
-    # DP 테이블 초기화
-    dp = [[[0] * 2 for _ in range(n2 + 1)] for _ in range(n1 + 1)]
+N, M = map(int, input().split())
 
-    # DP 계산
-    for i in range(n1 + 1):
-        for j in range(n2 + 1):
-            for k in range(2):
-                if k == 0:  # 'I'를 가져와야 할 차례
-                    if i > 0 and s1[i - 1] == 'I':
-                        dp[i][j][0] = max(dp[i][j][0], dp[i - 1][j][1] + 1)
-                    if j > 0 and s2[j - 1] == 'I':
-                        dp[i][j][0] = max(dp[i][j][0], dp[i][j - 1][1] + 1)
-                else:  # 'O'를 가져와야 할 차례
-                    if i > 0 and s1[i - 1] == 'O':
-                        dp[i][j][1] = max(dp[i][j][1], dp[i - 1][j][0] + 1)
-                    if j > 0 and s2[j - 1] == 'O':
-                        dp[i][j][1] = max(dp[i][j][1], dp[i][j - 1][0] + 1)
+train_list = [list(input()) for _ in range(2)]
 
-    # 시작 조건: 반드시 첫 번째 문자가 'I'여야 함
-    result = 0
-    for i in range(n1 + 1):
-        for j in range(n2 + 1):
-            if dp[i][j][0] > 0 and (dp[i][j][0] // 2 == 1):  # 문자열이 반드시 'I'로 끝나야 함
-                result = max(result, dp[i][j][0])
+# dp[s][t][i] = S의 s번째, T의 t번째까지 선택했을 때, train_list[i] 선택 시의 최대 길이
+dp = [[[1, 1] for _ in range(M)] for _ in range(N)]
 
-    return result
+ans = 0
+for s in range(N):
+    for t in range(M):
+        # 두 열차 중 하나를 고름
+        for i in range(2):
+            tmp_res = 1
+            cur = train_list[i][s if i == 0 else t]
+            # 이전에 S에서 연결했고 현재 열차가 연결이 가능할 때
+            if s > 0 and train_list[0][s - 1] != cur:
+                tmp_res = max(tmp_res, dp[s - 1][t][0] + 1)
+            elif s > 0:
+                tmp_res = max(tmp_res, dp[s - 1][t][0])
 
-# 예시 입력
-n1, n2 = 5, 5
-s1 = "OIOOI"
-s2 = "OOIOI"
-print(longest_alternating_string(n1, n2, s1, s2))  # 출력: 7
+            # 이전에 T에서 연결했고 현재 열차가 연결이 가능할 때
+            if t > 0 and train_list[1][t - 1] != cur:
+                tmp_res = max(tmp_res, dp[s][t - 1][1] + 1)
+            elif t > 0:
+                tmp_res = max(tmp_res, dp[s][t - 1][1])
+            
+            dp[s][t][i] = tmp_res
+            ans = max(ans, tmp_res)
+
+print(*dp, sep='\n')
+print(ans)
