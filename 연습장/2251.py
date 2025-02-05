@@ -1,63 +1,61 @@
-bottle_list = list(map(int, input().split()))
+from collections import deque
 
-water_list = [0, 0, bottle_list[2]]
+A, B, C = list(map(int, input().split()))
 
-def move_water(i, j, b2):
-    '''
-    b: 물병의 용량
-    '''
-    print()
-    print(water_list)
-    w1, w2 = water_list[i], water_list[j]
-    remain_b = b2 - w2
-    print(w1, '->', w2)
-    # 옮길 물의 양이 더 많은 경우
-    if w1 > remain_b:
-        w1 -= remain_b
-        w2 += remain_b
-    else:
-        w2 += w1
-        w1 = 0
+water_list = [0, 0, C]
 
-    water_list[i], water_list[j] = w1, w2
-    print(water_list)
-    print()
-    return water_list
+def move_water(w1, w2, b2):
+    remain = max(b2 - w2, 0)
+    remain = min(remain, w1)
 
-result = []
+    w1 -= remain
+    w2 += remain
+
+    return w1, w2
+
+result = set()
 visited = []
 
-def dfs(water_list, pre_move=(-1, -1), visited=[]):
-    '''
-    가득 찬 물병에는 옮길 수 없음
-    직전 이동의 반대는 생략
-    같은 조합은 visited 처리
+q = deque([(0, 0, C)])
+while q:
+    a, b, c = q.popleft()
+    if a == 0:
+        result.add(c)
+
+    # a -> b
+    w1, w2 = move_water(a, b, B)
+    if (w1, w2, c) not in visited:
+        q.append((w1, w2, c))
+        visited.append((w1, w2, c))
     
-    첫 번째 물통이 비어있을 경우 return
-    -> 어차피 조합 다 보면 끝남
-    '''
-    for i, w1 in enumerate(water_list):
-        for j, w2 in enumerate(water_list):
-            if i == j:
-                continue
-            
-            # w1 -> w2
-            pre_water = water_list[:]
-            water_list = move_water(i, j, bottle_list[j])
-            
-            # 이미 해봤던 조합 생략
-            if water_list in visited:
-                continue
-            
-            # 첫 번째 물통이 비었으면 기록
-            if water_list[0] == 0:
-                # print('find:', water_list)
-                result.append(water_list[2])
-            dfs(water_list, (i, j), visited + [water_list[:]])
-            
-            # 원래대로
-            water_list = pre_water
+    # a -> c
+    w1, w2 = move_water(a, c, C)
+    if (w1, b, w2) not in visited:
+        q.append((w1, b, w2))
+        visited.append((w1, b, w2))
+    
+    # b -> a
+    w1, w2 = move_water(b, a, A)
+    if (w2, w1, c) not in visited:
+        q.append((w2, w1, c))
+        visited.append((w2, w1, c))
+    
+    # b -> c
+    w1, w2 = move_water(b, c, C)
+    if (a, w1, w2) not in visited:
+        q.append((a, w1, w2))
+        visited.append((a, w1, w2))
 
-dfs(water_list)
+    # c -> a
+    w1, w2 = move_water(c, a, A)
+    if (w2, b, w1) not in visited:
+        q.append((w2, b, w1))
+        visited.append((w2, b, w1))
 
-print(*sorted(result), sep=' ')
+    # c -> b
+    w1, w2 = move_water(c, b, B)
+    if (a, w2, w1) not in visited:
+        q.append((a, w2, w1))
+        visited.append((a, w2, w1))
+
+print(*sorted(list(result)))
