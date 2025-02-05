@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 import heapq
+=======
+>>>>>>> 594e150527375a601f1d6cdedde81cb1b0c6826c
 T = int(input())
 
 for _ in range(T):
@@ -22,3 +25,7 @@ for _ in range(T):
             dp[j - i][j] += sum_list[j + 1] - sum_list[j - i]
     
     print(dp[0][K - 1])
+<<<<<<< HEAD
+=======
+    print(*dp, sep='\n')
+>>>>>>> 594e150527375a601f1d6cdedde81cb1b0c6826c
