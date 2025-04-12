@@ -1,96 +1,59 @@
-from collections import defaultdict
+import sys
+input = sys.stdin.readline
+sys.setrecursionlimit(10**5)
 
 N, M = map(int, input().split())
 
-graph = defaultdict(list)
+arr = [[] for _ in range(N+1)]
 
 for _ in range(M):
-    n1, n2, e = map(int, input().split())
+    a, b, c = map(int, input().split())
+    arr[a].append((b, c))
+    arr[b].append((a, c))
 
-    graph[n1].append((n2, e))
-    graph[n2].append((n1, e))
+cost = [0] * (N+1)
+weight = [0] * (N+1)
+impossible = False
+INF = float("INF")
+new_x = set()
+def dfs(node, node_cost, a):
+    global impossible, new_x
 
+    if cost[node]:
+        curr_a, curr_cost = cost[node]
 
-node_weights = {1: (0, 1)}
-visited = set([1])
-min_weight, max_weight = 1_000_000, -1_000_000
+        if curr_a == a:
+            if curr_cost != node_cost:
+                impossible = True
+        else:
+            if (node_cost - curr_cost) % 2 == 1:
+                impossible = True
+            else:
+                tmp_x = curr_a * (node_cost - curr_cost) // 2
+                new_x.add(tmp_x)
 
-is_cycle = False
-x = 0
+        return
 
+    cost[node] = (a, node_cost)
+    weight[node] = -a * node_cost
 
-def search_weight(graph, cur_node_idx=1, cur_node_weight=0, is_nag=-1):
-    global min_weight, max_weight, x, is_cycle
-    for n_node_idx, n_edge in graph[cur_node_idx]:
-        n_node_weight = n_edge - cur_node_weight
-        if n_node_idx in node_weights:
-            # 불가능할 경우
-            if node_weights[n_node_idx] != (n_node_weight, is_nag):
-                old_weights, old_nag = node_weights[n_node_idx]
-                if is_nag != old_nag:
-                    x = is_nag * (old_weights - n_node_weight) / 2
-                    # x는 정수여야 함
-                    if x != int(x):
-                        return False
-                    x = int(x)
-                    is_cycle = True
-        if n_node_idx in visited:
-            continue
+    for nxt, edge_cost in arr[node]:
+        dfs(nxt, edge_cost - node_cost, -a)
 
-        node_weights[n_node_idx] = (n_node_weight, is_nag)
+    return
 
-        min_weight, max_weight = min(n_node_weight, min_weight), max(
-            n_node_weight, max_weight
-        )
+dfs(1, 0, 1)
 
-        # x 부호 추가해야 함
-        # print(
-        #     f"{cur_node_idx} ({cur_node_weight}) -({n_edge})-> {n_node_idx} ({n_edge - cur_node_weight})"
-        # )
-        visited.add(n_node_idx)
-        if not search_weight(graph, n_node_idx, n_node_weight, -1 * is_nag):
-            return False
-    return True
-
-
-if search_weight(graph):
-    print("Yes")
-
-    # print(node_weights)
-
-    if not is_cycle:
-
-        min_cost = float("inf")
-        min_cost_x = 0
-        for x in range(min_weight, max_weight + 1):
-            cost = 0
-            for _, (node_weight, is_nag) in node_weights.items():
-                cost += abs(is_nag * x + node_weight)
-
-            if min_cost > cost:
-                min_cost = cost
-                min_cost_x = x
-
-            # print()
-            # print(x)
-
-            result = [0] * N
-            for node_index, (node_weight, is_nag) in node_weights.items():
-                result[node_index - 1] = is_nag * min_cost_x + node_weight
-
-            # print(*result)
-
-            # print(cost)
-            # print()
-
-    else:
-        min_cost_x = x
-
-    result = [0] * N
-    for node_index, (node_weight, is_nag) in node_weights.items():
-        result[node_index - 1] = is_nag * min_cost_x + node_weight
-
-    print(*result)
-
-else:
+if 1 < len(new_x) or impossible:
     print("No")
+else:
+    if new_x:
+        x = new_x.pop()
+    else:
+        weight.sort()
+        x = weight[(N+1) // 2]
+
+    print("Yes")
+    for a, c in cost[1:]:
+        print(a * x + c, end=" ")
+    print()
