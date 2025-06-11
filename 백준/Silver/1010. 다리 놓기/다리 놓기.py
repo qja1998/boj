@@ -1,5 +1,8 @@
-from math import factorial as fac
-t = int(input())
-for _ in range(t):
+from math import factorial
+
+T = int(input())
+
+for _ in range(T):
     n, m = map(int, input().split())
-    print(fac(m) // (fac(n) * fac(m - n)))
+
+    print(factorial(m) // (factorial(n) * factorial(m - n)))
