@@ -1,39 +1,44 @@
-def makeLps(p): #Lps 배열을 만든 후 리턴
-    tmpTable = [0] * len(p)
-    j = 0
-    for i in range(1, len(p)):
-        while j > 0 and p[i] != p[j]:
-            j = tmpTable[j - 1]
-        if p[i] == p[j]:
-            j += 1
-            tmpTable[i] = j
-    return tmpTable
- 
-def KMP(T, P):
-    result = []
-    cnt = 0
-    
-    j = 0
-    for i in range(len(T)):
-        while j > 0 and T[i] != P[j]:
-            j = table[j - 1]
-        
-        if T[i] == P[j]:
-            if j == len(P) - 1: #패턴과 모두 일치할 경우
-                cnt += 1
-                result.append(i - len(P) + 2)
-                j = table[j]
+def compute_prefix_array(pattern):
+    lps = [0] * len(pattern)
+    match_len = 0
+
+    for idx in range(1, len(pattern)):
+        while match_len > 0 and pattern[idx] != pattern[match_len]:
+            match_len = lps[match_len - 1]
+        if pattern[idx] == pattern[match_len]:
+            match_len += 1
+            lps[idx] = match_len
+    return lps
+
+
+def search_pattern(text, keyword, prefix):
+    positions = []
+    match_idx = 0
+    total_matches = 0
+
+    for i in range(len(text)):
+        while match_idx > 0 and text[i] != keyword[match_idx]:
+            match_idx = prefix[match_idx - 1]
+
+        if text[i] == keyword[match_idx]:
+            if match_idx == len(keyword) - 1:
+                total_matches += 1
+                positions.append(i - len(keyword) + 2)
+                match_idx = prefix[match_idx]
             else:
-                j += 1
-    return cnt, result
-    
-    
- 
-T = input()
-P = input()
- 
-table = makeLps(P)
- 
-a, b = KMP(T, P)
-print(a)
-print(*b)
+                match_idx += 1
+
+    return total_matches, positions
+
+
+# 입력
+text_input = input()
+pattern_input = input()
+
+# 전처리 및 탐색
+prefix_table = compute_prefix_array(pattern_input)
+match_count, indices = search_pattern(text_input, pattern_input, prefix_table)
+
+# 출력
+print(match_count)
+print(*indices)
