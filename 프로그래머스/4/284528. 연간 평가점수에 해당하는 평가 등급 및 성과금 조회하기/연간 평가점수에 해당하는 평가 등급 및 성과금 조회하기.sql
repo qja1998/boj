@@ -11,7 +11,7 @@ WITH avg_emp AS (
             ELSE 'C'
     END AS grade
     FROM hr_employees AS he
-        LEFT JOIN
+        JOIN
         hr_grade AS hg
         ON he.emp_no = hg.emp_no
     GROUP BY he.emp_no
