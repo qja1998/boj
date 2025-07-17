@@ -11,20 +11,16 @@ if len1 > len2:
 min_total_length = len1 + len2
 
 for start in range(-len1 + 1, len2):
-    is_possible = True
     
     for i in range(len1):
-
         gear2_idx = start + i
-
         if 0 <= gear2_idx < len2:
+            # 두 개의 이가 맞물리면 안됨
             if gear1[i] == 2 and gear2[gear2_idx] == 2:
-                is_possible = False
                 break
 
-    if is_possible:
+    else:
         current_length = max(len2, start + len1) - min(0, start)
-
         min_total_length = min(min_total_length, current_length)
 
 print(min_total_length)
